@@ -1,4 +1,4 @@
-System.register(["../views/index", "../models/index", "../helpers/decorators/index", "../service/index"], function (exports_1, context_1) {
+System.register(["../views/index", "../models/index", "../helpers/decorators/index", "../service/index", "../helpers/index"], function (exports_1, context_1) {
     "use strict";
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -7,7 +7,7 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
     var __moduleName = context_1 && context_1.id;
-    var index_1, index_2, index_3, index_4, NegotiationController, WeekDays;
+    var index_1, index_2, index_3, index_4, index_5, NegotiationController, WeekDays;
     return {
         setters: [
             function (index_1_1) {
@@ -21,10 +21,12 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
             },
             function (index_4_1) {
                 index_4 = index_4_1;
+            },
+            function (index_5_1) {
+                index_5 = index_5_1;
             }
         ],
         execute: function () {
-            alert('oi');
             NegotiationController = class NegotiationController {
                 constructor() {
                     this._allnegotiation = new index_2.AllNegotiations();
@@ -43,6 +45,7 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
                     this._allnegotiation.addInfos(negotiation);
                     this._negotiationsview.update(this._allnegotiation);
                     this._mensagemview.update('Negociação adicionada com sucesso!');
+                    index_5.print(negotiation, this._allnegotiation);
                 }
                 _workingDays(date) {
                     return date.getDay() != WeekDays.Sunday && date.getDay() != WeekDays.Saturday;
@@ -54,8 +57,11 @@ System.register(["../views/index", "../models/index", "../helpers/decorators/ind
                             return res;
                         throw new Error(res.statusText);
                     })
-                        .then(allnegotiations => {
-                        allnegotiations.forEach(negotiation => this._allnegotiation.addInfos(negotiation));
+                        .then(negotiationsToImport => {
+                        const negotiationsImported = this._allnegotiation.toArray();
+                        negotiationsToImport.
+                            filter(negotiation => !negotiationsImported.some(importedBefore => negotiation.isTheSame(importedBefore)))
+                            .forEach(negotiation => this._allnegotiation.addInfos(negotiation));
                         this._negotiationsview.update(this._allnegotiation);
                     });
                 }

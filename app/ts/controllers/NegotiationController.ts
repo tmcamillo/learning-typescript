@@ -1,9 +1,9 @@
 import { NegotiationsView, MensagemView } from '../views/index';
 import { Negotiation, AllNegotiations, ParcialNegotiation } from '../models/index';
 import { logPerformance, domInject, throttle } from '../helpers/decorators/index';
-import { NegotiationService } from '../service/index'
+import { NegotiationService } from '../service/index';
+import { print } from '../helpers/index';
 
-alert('oi');
 export class NegotiationController {
 
     @domInject('#data')
@@ -41,6 +41,7 @@ export class NegotiationController {
         this._allnegotiation.addInfos(negotiation);
         this._negotiationsview.update(this._allnegotiation);
         this._mensagemview.update('Negociação adicionada com sucesso!');
+        print(negotiation, this._allnegotiation);
     }
 
     private _workingDays(date: Date) {
@@ -55,9 +56,16 @@ export class NegotiationController {
                 if (res.ok) return res;
                 throw new Error(res.statusText);
             })
-            .then(allnegotiations => {
+            .then(negotiationsToImport => {
 
-                allnegotiations.forEach(negotiation => this._allnegotiation.addInfos(negotiation));
+                const negotiationsImported = this._allnegotiation.toArray();
+                negotiationsToImport.
+                    filter(negotiation =>
+                        !negotiationsImported.some(importedBefore =>
+                            negotiation.isTheSame(importedBefore)))
+                    .forEach(negotiation =>
+                        this._allnegotiation.addInfos(negotiation));
+
                 this._negotiationsview.update(this._allnegotiation);
             });
     }
